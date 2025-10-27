@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
 import os 
 
 #instantiating app object
@@ -27,7 +28,7 @@ class User(db.Model):
 
 #basic route with an end point of /home
 #home route 
-@app.route('/home', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def hello():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -45,10 +46,15 @@ def hello():
             return render_template('index.html', username=username, errors=errors, email=email, password=password)
         hashed = generate_password_hash(password)
         user = User(username=username, email=email, password=hashed)
+        
         db.session.add(user)
-        db.session.commit()
-        flash('User registerd successfully')
-        flash('user registered successfully','success')
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('User with that username or email already exists', 'danger')
+            return render_template('index.html')
+        flash('User regisered successfully ')
 
         #set session 
         session['username'] = user.email
@@ -75,12 +81,16 @@ def login_page():
 
         session['username'] = user.username
         session['email'] = user.email
+        flash('User logged in successfully', 'success')
+        return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 #dashboard route
 @app.route('/dashboard')
 def dashboard():
-    return render_template('user.html')
+    if 'username' not in session:
+        return redirect(url_for('login_page'))
+    return render_template('dashboard.html', username=session.get('username'))
 
 if __name__ == '__main__':
     with app.app_context():
