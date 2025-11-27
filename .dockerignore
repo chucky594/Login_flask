@@ -1,23 +1,13 @@
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-
-# Venv
+myenv/
 venv/
 .env/
-.env.*
-
-# Git files
+__pycache__/
+*.pyc
+instance/*.db
+*.env
+*.log
 .git
 .gitignore
-
-# Docker build artifacts
-*.db
-instance/
-data/
-tests/
-*.log
-
-# OS junk
 .DS_Store
+
+
