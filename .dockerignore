@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Venv
+venv/
+.env/
+.env.*
+
+# Git files
+.git
+.gitignore
+
+# Docker build artifacts
+*.db
+instance/
+data/
+tests/
+*.log
+
+# OS junk
+.DS_Store
