@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 #secret key 
-app.secret_key= os.environ.get('SECRET_KEY', 'my_dev_secret_key')
+app.secret_key= os.environ.get('SECwelcome/enockRET_KEY', 'my_dev_secret_key')
 
 #setting up database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -52,12 +52,12 @@ def hello():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            flash('User with that username or email already exists', 'danger')
+            flash('User with that username or email already exists', category='danger')
             return render_template('index.html')
-        flash('User regisered successfully ')
+        flash('User regisered successfully ', category="success")
 
         #set session 
-        session['username'] = user.email
+        session['username'] = user.username
         session['email'] = user.email
 
         return redirect(url_for('dashboard'))
@@ -69,17 +69,15 @@ def hello():
 @app.route('/login', methods=['POST', 'GET'])
 def login_page():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password','')
 
         errors = []
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
         if not user or not check_password_hash(user.password, password):
             errors.append('Invalid username or password')
-            return render_template('index.html', errors=errors, username=username, email=email)
+            return render_template('index.html', errors=errors, email=email)
 
-        session['username'] = user.username
         session['email'] = user.email
         flash('User logged in successfully', 'success')
         return redirect(url_for('dashboard'))
@@ -93,6 +91,5 @@ def dashboard():
     return render_template('dashboard.html', username=session.get('username'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
